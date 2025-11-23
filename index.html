@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomía Interactiva | Enciclopedia Corporal</title>
+    
+    <!-- Importación de Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <!-- Script para Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        /* --- VARIABLES CSS --- */
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #2c3e50;
+            --primary-teal: #008080;
+            --accent-coral: #ff6b6b;
+            --clinical-blue: #e3f2fd;
+            --digestive-orange: #ff9f43;
+            --bone-gray: #7f8c8d;
+            --lung-blue: #a2d2ff;
+            --kidney-purple: #cdb4db;
+            --liver-brown: #d7ccc8;
+            --eye-cyan: #80deea;
+            --skin-nude: #ffccbc;
+            --white: #ffffff;
+            --shadow-soft: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-hover: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        /* --- ESTILOS GLOBALES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+        h1, h2, h3 { font-family: 'Roboto', sans-serif; color: var(--primary-teal); }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background-color: var(--white);
+            padding: 1rem 2%;
+            box-shadow: var(--shadow-soft);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary-teal);
+        }
+        .logo { font-weight: 700; font-size: 1.1rem; color: var(--primary-teal); display: flex; align-items: center; gap: 10px; white-space: nowrap; flex-shrink: 0; }
+        
+        .nav-links-container {
+            overflow-x: auto;
+            margin-left: 20px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .nav-links-container::-webkit-scrollbar { display: none; }
+
+        .nav-links { 
+            list-style: none; 
+            display: flex; 
+            gap: 15px; 
+            white-space: nowrap;
+            padding-bottom: 5px;
+        }
+        .nav-links a { text-decoration: none; color: var(--text-color); font-weight: 600; font-size: 0.9rem; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--accent-coral); }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2f1 100%);
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary-teal); }
+
+        /* --- CONTENEDOR --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+        /* --- TARJETAS --- */
+        .component-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            scroll-margin-top: 100px;
+        }
+        .component-section:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+
+        .text-content h2 { margin-bottom: 1rem; border-left: 5px solid var(--accent-coral); padding-left: 1rem; }
+        .parts-list { margin: 1rem 0; list-style-type: none; }
+        .parts-list li { margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative; }
+        .parts-list li::before { content: "•"; color: var(--primary-teal); font-weight: bold; position: absolute; left: 0; }
+
+        /* --- MODEL VIEWER --- */
+        .model-wrapper {
+            position: relative;
+            background-color: #f0f4f8;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 400px;
+            min-height: 300px;
+        }
+        model-viewer { width: 100%; height: 100%; }
+        
+        .placeholder-msg {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #555;
+            border: 1px solid #ddd;
+            width: max-content;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* --- NOTA CLÍNICA CON NAVEGACIÓN --- */
+        .clinical-note {
+            grid-column: 1 / -1;
+            background-color: var(--clinical-blue);
+            border-left: 5px solid #2196f3;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 1rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .note-header h4 { margin: 0; color: #1565c0; display: flex; align-items: center; gap: 8px; }
+
+        .note-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.5);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .fact-text {
+            flex-grow: 1;
+            font-size: 0.95rem;
+            transition: opacity 0.3s ease;
+            min-height: 3.2em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            background: var(--white);
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-teal);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-btn:hover { background: var(--primary-teal); color: var(--white); border-color: var(--primary-teal); }
+
+        /* Barra de progreso */
+        .fact-progress {
+            height: 4px;
+            background-color: rgba(0,0,0,0.1);
+            width: 100%;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-teal);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* --- SECCIÓN QUIZ --- */
+        #quiz-section {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 15px;
+            border: 2px solid var(--primary-teal);
+            margin-top: 4rem;
+            text-align: center;
+        }
+        .quiz-btn {
+            background-color: var(--primary-teal);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .quiz-btn:hover { background-color: #006666; }
+        
+        .quiz-container { display: none; text-align: left; max-width: 800px; margin: 0 auto; }
+        .question-text { font-size: 1.3rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-color); }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .option-btn:hover { border-color: var(--primary-teal); background: #e0f2f1; }
+        .option-btn.correct { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.incorrect { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+
+        .quiz-results { display: none; text-align: center; }
+        .score-display { font-size: 2rem; font-weight: bold; color: var(--primary-teal); margin: 20px 0; }
+        .error-review { text-align: left; margin-top: 2rem; background: #fff3f3; padding: 20px; border-radius: 8px; }
+        .error-item { margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--primary-teal);
+            color: var(--white);
+            margin-top: 4rem;
+            font-size: 0.9rem;
+        }
+        .footer-credits {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 10px;
+            display: inline-block;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .navbar { flex-direction: column; align-items: flex-start; padding: 1rem; }
+            .nav-links-container { margin-left: 0; margin-top: 10px; width: 100%; }
+        }
+        @media (max-width: 768px) {
+            .component-section { grid-template-columns: 1fr; padding: 1.5rem; }
+            .component-section > .model-wrapper { order: -1 !important; } 
+            .component-section > .text-content { order: 1 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            Anatomía 3D
+        </div>
+        <div class="nav-links-container">
+            <ul class="nav-links">
+                <li><a href="#corazon">Corazón</a></li>
+                <li><a href="#cerebro">Cerebro</a></li>
+                <li><a href="#pulmones">Pulmones</a></li>
+                <li><a href="#digestivo">Digestivo</a></li>
+                <li><a href="#higado">Hígado</a></li>
+                <li><a href="#rinones">Riñones</a></li>
+                <li><a href="#esqueleto">Esqueleto</a></li>
+                <li><a href="#ojos">Ojos</a></li>
+                <li><a href="#piel">Piel</a></li>
+                <li><a href="#reproductor">Reproductor</a></li>
+                <li><a href="#quiz-section" style="color:var(--accent-coral)">★ Quiz</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header>
+        <h1>🫀 Anatomía Interactiva: Enciclopedia</h1>
+        <p>Explora 10 sistemas vitales y ponte a prueba con el cuestionario final.</p>
+    </header>
+
+    <main class="container">
+
+        <!-- 1. CORAZÓN -->
+        <section id="corazon" class="component-section">
+            <div class="text-content">
+                <h2>El Corazón</h2>
+                <p>La bomba muscular que mantiene la circulación sanguínea.</p>
+                <ul class="parts-list">
+                    <li><strong>Ventrículos:</strong> Cámaras de bombeo.</li>
+                    <li><strong>Aorta:</strong> Arteria principal.</li>
+                </ul>
+            </div>
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/heart.glb" alt="Modelo 3D del corazón" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/e3f2fd/008080?text=Corazon"></model-viewer>
+                <div class="placeholder-msg">🫀 Modelo 3D del Corazón</div>
+            </div>
+            <div class="clinical-note">
+                <div class="note-header"><h4>📋 Dato Cardíaco</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('corazon', -1)">❮</button>
+                    <p id="fact-corazon" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('corazon', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-corazon"></div></div>
+            </div>
+        </section>
+
+        <!-- 2. CEREBRO -->
+        <section id="cerebro" class="component-section">
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/brain.glb" alt="Modelo 3D del cerebro" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/f3e5f5/8e24aa?text=Cerebro"></model-viewer>
+                <div class="placeholder-msg">🧠 Modelo 3D del Cerebro</div>
+            </div>
+            <div class="text-content">
+                <h2>El Cerebro</h2>
+                <p>Centro de control del sistema nervioso.</p>
+                <ul class="parts-list">
+                    <li><strong>Corteza:</strong> Funciones superiores.</li>
+                    <li><strong>Cerebelo:</strong> Coordinación.</li>
+                </ul>
+            </div>
+            <div class="clinical-note" style="background-color: #f3e5f5; border-left-color: #8e24aa;">
+                <div class="note-header"><h4 style="color:#8e24aa">📋 Dato Neurológico</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('cerebro', -1)">❮</button>
+                    <p id="fact-cerebro" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('cerebro', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-cerebro" style="background-color: #8e24aa;"></div></div>
+            </div>
+        </section>
+
+        <!-- 3. PULMONES -->
+        <section id="pulmones" class="component-section">
+            <div class="text-content">
+                <h2 style="border-left-color: var(--lung-blue);">Los Pulmones</h2>
+                <p>Órganos esponjosos responsables del intercambio gaseoso (oxígeno por dióxido de carbono).</p>
+                <ul class="parts-list">
+                    <li><strong>Alvéolos:</strong> Sacos de aire microscópicos.</li>
+                    <li><strong>Bronquios:</strong> Conductos de aire principales.</li>
+                </ul>
+            </div>
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/lungs.glb" alt="Modelo 3D de los pulmones" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/e1f5fe/0288d1?text=Pulmones"></model-viewer>
+                <div class="placeholder-msg">🫁 Modelo 3D de los Pulmones</div>
+            </div>
+            <div class="clinical-note" style="background-color: #e1f5fe; border-left-color: var(--lung-blue);">
+                <div class="note-header"><h4 style="color:#0277bd">📋 Dato Respiratorio</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('pulmones', -1)">❮</button>
+                    <p id="fact-pulmones" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('pulmones', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-pulmones" style="background-color: var(--lung-blue);"></div></div>
+            </div>
+        </section>
+
+        <!-- 4. DIGESTIVO -->
+        <section id="digestivo" class="component-section">
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/digestive.glb" alt="Modelo 3D del sistema digestivo" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/fff3e0/e67e22?text=Digestivo"></model-viewer>
+                <div class="placeholder-msg">🍽️ Modelo 3D del Sistema Digestivo</div>
+            </div>
+            <div class="text-content">
+                <h2 style="border-left-color: var(--digestive-orange);">S. Digestivo</h2>
+                <p>Procesa alimentos para obtener energía y nutrientes.</p>
+                <ul class="parts-list">
+                    <li><strong>Estómago:</strong> Descomposición química.</li>
+                    <li><strong>Intestinos:</strong> Absorción.</li>
+                </ul>
+            </div>
+            <div class="clinical-note" style="background-color: #fff3e0; border-left-color: #e67e22;">
+                <div class="note-header"><h4 style="color:#e65100">📋 Dato Gástrico</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('digestivo', -1)">❮</button>
+                    <p id="fact-digestivo" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('digestivo', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-digestivo" style="background-color: var(--digestive-orange);"></div></div>
+            </div>
+        </section>
+
+        <!-- 5. HÍGADO -->
+        <section id="higado" class="component-section">
+            <div class="text-content">
+                <h2 style="border-left-color: var(--liver-brown);">El Hígado</h2>
+                <p>El laboratorio químico del cuerpo, filtra toxinas y produce bilis.</p>
+                <ul class="parts-list">
+                    <li><strong>Hepatocitos:</strong> Células funcionales del hígado.</li>
+                    <li><strong>Vesícula:</strong> Almacenamiento de bilis.</li>
+                </ul>
+            </div>
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/liver.glb" alt="Modelo 3D del hígado" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/efebe9/5d4037?text=Higado"></model-viewer>
+                <div class="placeholder-msg">🧫 Modelo 3D del Hígado</div>
+            </div>
+            <div class="clinical-note" style="background-color: #efebe9; border-left-color: var(--liver-brown);">
+                <div class="note-header"><h4 style="color:#5d4037">📋 Dato Hepático</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('higado', -1)">❮</button>
+                    <p id="fact-higado" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('higado', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-higado" style="background-color: var(--liver-brown);"></div></div>
+            </div>
+        </section>
+
+        <!-- 6. RIÑONES -->
+        <section id="rinones" class="component-section">
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/kidney.glb" alt="Modelo 3D de los riñones" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/f3e5f5/7b1fa2?text=Rinones"></model-viewer>
+                <div class="placeholder-msg">🫘 Modelo 3D de los Riñones</div>
+            </div>
+            <div class="text-content">
+                <h2 style="border-left-color: var(--kidney-purple);">Los Riñones</h2>
+                <p>El sistema de filtración que elimina desechos y regula el equilibrio de líquidos.</p>
+                <ul class="parts-list">
+                    <li><strong>Nefronas:</strong> Unidades de filtrado.</li>
+                    <li><strong>Uréteres:</strong> Conductos hacia la vejiga.</li>
+                </ul>
+            </div>
+            <div class="clinical-note" style="background-color: #f3e5f5; border-left-color: var(--kidney-purple);">
+                <div class="note-header"><h4 style="color:#7b1fa2">📋 Dato Renal</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('rinones', -1)">❮</button>
+                    <p id="fact-rinones" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('rinones', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-rinones" style="background-color: var(--kidney-purple);"></div></div>
+            </div>
+        </section>
+
+        <!-- 7. ESQUELETO -->
+        <section id="esqueleto" class="component-section">
+            <div class="text-content">
+                <h2 style="border-left-color: var(--bone-gray);">S. Esquelético</h2>
+                <p>Soporte estructural y protección de órganos.</p>
+                <ul class="parts-list">
+                    <li><strong>Fémur:</strong> Hueso más largo.</li>
+                    <li><strong>Cráneo:</strong> Protección cerebral.</li>
+                </ul>
+            </div>
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/skeleton.glb" alt="Modelo 3D del esqueleto" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/eceff1/607d8b?text=Esqueleto"></model-viewer>
+                <div class="placeholder-msg">🦴 Modelo 3D del Esqueleto</div>
+            </div>
+            <div class="clinical-note" style="background-color: #eceff1; border-left-color: var(--bone-gray);">
+                <div class="note-header"><h4 style="color:#455a64">📋 Dato Óseo</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('esqueleto', -1)">❮</button>
+                    <p id="fact-esqueleto" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('esqueleto', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-esqueleto" style="background-color: var(--bone-gray);"></div></div>
+            </div>
+        </section>
+
+        <!-- 8. OJOS -->
+        <section id="ojos" class="component-section">
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/eye.glb" alt="Modelo 3D del ojo" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/e0f7fa/0097a7?text=Ojos"></model-viewer>
+                <div class="placeholder-msg">👁️ Modelo 3D del Ojo</div>
+            </div>
+            <div class="text-content">
+                <h2 style="border-left-color: var(--eye-cyan);">Los Ojos</h2>
+                <p>Órganos sensoriales complejos que captan la luz y la convierten en impulsos eléctricos.</p>
+                <ul class="parts-list">
+                    <li><strong>Retina:</strong> Tejido sensible a la luz.</li>
+                    <li><strong>Cristalino:</strong> Lente natural de enfoque.</li>
+                </ul>
+            </div>
+            <div class="clinical-note" style="background-color: #e0f7fa; border-left-color: var(--eye-cyan);">
+                <div class="note-header"><h4 style="color:#006064">📋 Dato Visual</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('ojos', -1)">❮</button>
+                    <p id="fact-ojos" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('ojos', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-ojos" style="background-color: var(--eye-cyan);"></div></div>
+            </div>
+        </section>
+
+        <!-- 9. PIEL -->
+        <section id="piel" class="component-section">
+            <div class="text-content">
+                <h2 style="border-left-color: var(--skin-nude);">La Piel</h2>
+                <p>El órgano más grande del cuerpo, barrera protectora contra el mundo exterior.</p>
+                <ul class="parts-list">
+                    <li><strong>Epidermis:</strong> Capa externa.</li>
+                    <li><strong>Dermis:</strong> Contiene nervios y vasos.</li>
+                </ul>
+            </div>
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/skin.glb" alt="Modelo 3D de la piel" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/fbe9e7/d84315?text=Piel"></model-viewer>
+                <div class="placeholder-msg">🛡️ Modelo 3D de la Piel</div>
+            </div>
+            <div class="clinical-note" style="background-color: #fbe9e7; border-left-color: var(--skin-nude);">
+                <div class="note-header"><h4 style="color:#bf360c">📋 Dato Dermatológico</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('piel', -1)">❮</button>
+                    <p id="fact-piel" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('piel', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-piel" style="background-color: var(--skin-nude);"></div></div>
+            </div>
+        </section>
+
+        <!-- 10. REPRODUCTOR -->
+        <section id="reproductor" class="component-section">
+            <div class="model-wrapper">
+                <model-viewer src="https://raw.githubusercontent.com/Tanakaxe/anatom-a-interactiva/main/dna.glb" alt="Modelo 3D del ADN" auto-rotate camera-controls shadow-intensity="1" poster="https://placehold.co/600x400/fce4ec/ad1457?text=Genetica"></model-viewer>
+                <div class="placeholder-msg">🧬 Modelo 3D del ADN</div>
+            </div>
+            <div class="text-content">
+                <h2 style="border-left-color: #e91e63;">S. Reproductor</h2>
+                <p>Sistema encargado de la procreación y la herencia genética.</p>
+                <ul class="parts-list">
+                    <li><strong>Gametos:</strong> Células sexuales.</li>
+                    <li><strong>ADN:</strong> Código genético.</li>
+                </ul>
+            </div>
+            <div class="clinical-note" style="background-color: #fce4ec; border-left-color: #d81b60;">
+                <div class="note-header"><h4 style="color:#880e4f">📋 Dato Biológico</h4></div>
+                <div class="note-content">
+                    <button class="nav-btn" onclick="changeFact('reproductor', -1)">❮</button>
+                    <p id="fact-reproductor" class="fact-text">Cargando datos...</p>
+                    <button class="nav-btn" onclick="changeFact('reproductor', 1)">❯</button>
+                </div>
+                <div class="fact-progress"><div class="progress-bar" id="prog-reproductor" style="background-color: #e91e63;"></div></div>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section id="quiz-section">
+            <h2>🧠 Desafío de Anatomía</h2>
+            <p>Se seleccionarán 10 preguntas aleatorias de nuestra base de datos de 50.</p>
+            
+            <button id="start-btn" class="quiz-btn" onclick="startQuiz()">Comenzar Quiz</button>
+
+            <div id="quiz-container" class="quiz-container">
+                <div class="question-text" id="question-text"></div>
+                <div class="options-grid" id="options-grid"></div>
+                <p id="progress-text" style="text-align: right; margin-top: 10px; color: #666;"></p>
+            </div>
+
+            <div id="quiz-results" class="quiz-results">
+                <h3>¡Quiz Completado!</h3>
+                <div class="score-display">Puntuación: <span id="final-score">0</span>/10</div>
+                <p id="score-msg"></p>
+                
+                <div id="error-review" class="error-review" style="display:none;">
+                    <h4>Repaso de errores:</h4>
+                    <div id="error-list"></div>
+                </div>
+
+                <button class="quiz-btn" onclick="startQuiz()">Intentar de nuevo</button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2025 Anatomía Interactiva EdTech. Proyecto Educativo.</p>
+        <div class="footer-credits">
+            Hecho por Elkin Alberto Tabares Osorio - Unimagdalena - Hardware y redes de computadores
+        </div>
+    </footer>
+
+    <!-- SCRIPT PRINCIPAL -->
+    <script>
+        // --- BASE DE DATOS DE HECHOS (30 por órgano) ---
+        const factsDB = {
+            corazon: [
+                "Tu corazón bombea con la fuerza suficiente para echar sangre a 9 metros. No lo intentes.", 
+                "Es un músculo y late unas 100,000 veces al día. Está más ocupado que tú en vacaciones.", 
+                "El sonido 'tup-tup' es el cierre de sus cuatro válvulas. Es su forma de decir '¡Siguiente!'.",
+                "Comienza a latir antes de que te des cuenta de que existes (a las 4 semanas de gestación).",
+                "Bombea aproximadamente 5 litros de sangre por minuto. Suficiente para llenar un galón cada 60 segundos.", 
+                "Tiene su propio 'marcapasos' eléctrico. Trabaja 24/7 y nunca pide aumento.",
+                "El cáncer de corazón es extremadamente raro. Al menos esa parte de ti es resistente al drama.",
+                "La risa genuina puede aumentar el flujo sanguíneo en un 20%. Ríe más, haz cardio gratis.", 
+                "El corazón de la mujer late ligeramente más rápido. (Probablemente por soportar más cosas).",
+                "El lunes es el día con más ataques cardíacos. Coincidencia? No lo creo. El estrés laboral es real.",
+                "Si la aorta se rompiera, sería como la explosión de un tubo principal en la ciudad.",
+                "Las córneas son las únicas partes que no necesitan que el corazón les bombee sangre. Son autosuficientes.",
+                "El estrés puede darte el 'Síndrome del Corazón Roto' (cardiomiopatía). Sí, es real, y sí, duele.",
+                "Tu corazón no descansa; solo se relaja brevemente entre latidos. Un verdadero adicto al trabajo.",
+                "En una vida media, podría llenar una piscina con todo lo que bombea. Piensa en esa factura de agua.",
+                "El corazón es inclinado, no está justo a la izquierda. No es tan dramático como para estar solo en un lado.",
+                "La sangre tarda unos 20 segundos en circular por todo el cuerpo. ¿Y tú te quejas de la velocidad de tu internet?",
+                "El corazón consume tanta energía que si fuera una bombilla, sería de las más potentes.",
+                "La válvula mitral, que conecta dos cámaras, se cierra para evitar el 'reflujo'.",
+                "La presión arterial alta es el enemigo silencioso del corazón. Sarcasmo: 'Me encanta mi presión alta'.",
+                "El corazón fetal late casi el doble de rápido. Es un bebé muy emocionado por salir.",
+                "Aunque está en el tórax, su punta apunta a la izquierda, de ahí el error común.",
+                "El ejercicio hace que sea más eficiente. Trabaja menos para bombear más: la definición de productividad.",
+                "El corazón solo es del tamaño de tu puño. Mucho poder en un paquete pequeño.",
+                "La sangre que va al cuerpo es de un rojo brillante, y la que vuelve es rojo oscuro. Mismo color, distinto nivel de oxígeno.",
+                "El corazón está cubierto por el pericardio, una bolsa de doble capa. Nunca sale sin su capa protectora.",
+                "La circulación coronaria lo alimenta a él mismo. Auto-cuidado en su máxima expresión.",
+                "Las ballenas azules tienen el corazón más grande del planeta. Necesitas un carrito para transportarlo.",
+                "Se considera la primera 'máquina' del cuerpo en activarse.",
+                "Los vasos sanguíneos que salen del corazón son tan largos que podrían rodear la Tierra dos veces. Todo un viajero."
+            ],
+            cerebro: [
+                "Es 60% grasa. Finalmente, una explicación de por qué los pensamientos se 'queman' tan lento a veces.", 
+                "No siente dolor. Puedes apuñalarlo (no lo hagas) y no sentirá nada, pero el cuero cabelludo sí.", 
+                "Pesa solo 1.4 kg, pero consume el 20% de tu oxígeno y energía. Un órgano diminuto y muy exigente.",
+                "Genera más electricidad al estar despierto que un mini-LED. Es una planta de energía personal.",
+                "La información viaja a más de 400 km/h. Mucho más rápido que tu bus escolar.",
+                "Tiene 86 mil millones de neuronas. Más que estrellas en la Vía Láctea (casi).",
+                "El alcohol no mata neuronas, daña las conexiones entre ellas. Es más sutil y por eso es peor.",
+                "Usamos el 100% de él, no el 10%. La idea del 10% fue un rumor ridículo que se quedó.",
+                "El cerebro sigue activo mientras duermes. Es cuando clasifica tus dramas y memorias.",
+                "El 'déjà vu' es un fallo de procesamiento, como cuando el internet carga dos veces la misma página.",
+                "El lóbulo frontal te permite tomar decisiones. Si haces algo estúpido, échale la culpa a tu lóbulo frontal inmaduro.",
+                "El cerebelo es clave para el equilibrio. Gracias a él no te caes al caminar por un bordillo.",
+                "El hipocampo es la biblioteca de la memoria. Si pierdes las llaves, es culpa de esta sección.",
+                "El cerebro flota en líquido cefalorraquídeo. Necesita su propio jacuzzi protector.",
+                "La parte izquierda controla tu lado derecho y viceversa. Es un sistema cruzado... como los cables de tu casa.",
+                "Los hombres y mujeres tienen cerebros muy similares. Fin del debate, todos tenemos el mismo hardware.",
+                "El cerebro no puede hacer 'multitarea' real, solo cambia de foco muy rápido. No te creas especial.",
+                "La corteza cerebral está arrugada para caber más. La evolución es práctica, no estética.",
+                "Se desarrolla completamente alrededor de los 25 años. Tranquilo, tu inmadurez tiene fecha de caducidad.",
+                "Las neuronas son las únicas células que no se tocan. Se comunican por sustancias químicas (neurotransmisores).",
+                "Necesita glucosa como principal combustible. Dale azúcar o se pone de mal humor.",
+                "Los recuerdos no se guardan en un solo lugar, sino en una red de conexiones. Es un sistema descentralizado.",
+                "La amígdala procesa el miedo. Es la pequeña alarma que suena cuando tu madre te mira fijamente.",
+                "El hipotálamo regula la temperatura. Tu termostato interno personal.",
+                "Un pensamiento libera una sustancia química. ¡Tu cerebro es una farmacia constante!",
+                "El cerebro es el órgano más sensible a la falta de oxígeno. No aguanta las esperas.",
+                "Las ondas cerebrales cambian según lo que haces. Estudiar genera ondas muy diferentes a ver TikTok.",
+                "La plasticidad cerebral le permite aprender cosas nuevas. Nunca es tarde para ser un sabelotodo.",
+                "El bulbo raquídeo controla tu respiración y ritmo cardíaco. Menos mal, porque no podrías hacerlo manualmente.",
+                "El sueño es como un reinicio. Borra el caché y recarga la batería para el drama de mañana."
+            ],
+            pulmones: [
+                "El pulmón izquierdo es más pequeño para darle espacio al corazón. El corazón siempre acapara.", 
+                "Si extendieras todos los alvéolos, cubrirían una cancha de tenis. ¡Imagínate esa superficie!", 
+                "El aire que respiras primero baja por la tráquea. El tubo principal para tus aires.",
+                "Respiramos unas 20,000 veces al día. Y tú pensabas que no hacías nada todo el día.", 
+                "El diafragma es el músculo bajo el pulmón. Es tu 'esponja' de aire gigante.",
+                "Al nacer son de un color rosado brillante; el humo de la contaminación los vuelve más grises.", 
+                "La tos es tu mecanismo de expulsión, ¡como un cañón miniatura!",
+                "Se pueden vivir con un solo pulmón. Es posible ser un 'unipulmonar', pero no se lo digas a tu profe de deporte.", 
+                "Están protegidos por una capa llamada pleura, que tiene líquido. Es como su bolsa protectora.",
+                "El bostezo mete mucho aire. Tu cuerpo te recuerda que estás aburrido o cansado.", 
+                "Los bronquios son los tubos de aire principales. Como autopistas aéreas.",
+                "La faringe y laringe son la conexión de la respiración y la comida. Una zona peligrosa de tráfico.",
+                "La sangre pasa por los alvéolos a buscar oxígeno. Es un intercambio muy rápido.",
+                "Solo la parte de abajo del pulmón es la más efectiva para el intercambio. Respira profundo, no solo 'por encima'.",
+                "El hipo es un espasmo del diafragma. Es el motor de la respiración enloqueciendo.",
+                "Las 'células escoba' (cilios) limpian el moco. Una brigada de limpieza interna.",
+                "El cuerpo prefiere el oxígeno al 100%. No le gusta el aire 'usado' que sale.",
+                "Se les puede meter agua si te ahogas. Por eso flotan al estar inflados.",
+                "El aire entra frío y sale caliente. Calefacción y ventilación integradas.",
+                "El dióxido de carbono es el gas de desecho. La basura de tu metabolismo.",
+                "La hiperventilación es respirar demasiado rápido. El pánico es un mal controlador de aire.",
+                "El aire pasa por filtros: nariz (pelitos) y garganta. Tu control de calidad de aire.",
+                "En reposo, solo usamos una parte pequeña de la capacidad pulmonar. Somos perezosos.",
+                "El pulmón derecho es más grande que el izquierdo, porque es el 'dueño' del espacio.",
+                "La capacidad pulmonar total es de 6 litros. Puedes almacenar mucho, pero úsalo.",
+                "La sangre va a los pulmones sin oxígeno y regresa con él. El servicio de recarga.",
+                "La respiración es automática, pero también podemos controlarla. Es un sistema híbrido.",
+                "El olfato es clave para la respiración. Un olor fuerte te hace respirar por la boca.",
+                "La tráquea se divide en dos bronquios. Una bifurcación esencial.",
+                "El cáncer de pulmón es muy agresivo. Fumar es la peor idea para tus pulmones."
+            ],
+            digestivo: [
+                "El ácido del estómago es tan fuerte que podría disolver metal. Menos mal que se renueva cada 3 días.", 
+                "El intestino delgado es de 7 metros. Parece que llevas una manguera en el vientre.", 
+                "La saliva es el inicio de la digestión. Babear es ciencia.",
+                "La comida va al estómago aunque estés de cabeza. La gravedad no lo detiene (se llama peristalsis).",
+                "El estómago solo hace la 'descomposición' química. La absorción real ocurre después.",
+                "Tenemos más bacterias en el intestino que células humanas en el cuerpo. ¡Estás lleno de inquilinos!",
+                "La comida tarda entre 24 y 72 horas en recorrer el circuito completo. Es un viaje lento.",
+                "El intestino es el 'segundo cerebro' (sistema nervioso entérico). Un cerebro para procesar tus antojos.", 
+                "Los eructos son aire que tragaste. Es el 'feedback' de tu sistema gástrico.",
+                "El páncreas ayuda a neutralizar el ácido del estómago en el intestino. Un pacificador químico.", 
+                "Producimos cerca de 1.5 litros de saliva al día. Vaya desperdicio.",
+                "El intestino delgado tiene microvellosidades que multiplican la superficie de absorción. Es una alfombra mágica.",
+                "El hígado está implicado en la digestión a través de la producción de bilis. Es el 'chef' de los jugos.",
+                "El apéndice no es inútil, alberga bacterias buenas para repoblar la flora. Es una reserva de emergencia.",
+                "Las enzimas digestivas descomponen todo: carbohidratos, grasas y proteínas. Son el escuadrón anti-comida.",
+                "El colon absorbe el agua. Sin él, estarías deshidratado.",
+                "El hipo es un espasmo involuntario del diafragma. El cuerpo dice: '¡Basta, aire!'",
+                "El esófago es un simple tubo. La autopista que no se detiene.",
+                "El píloro es la 'puerta' del estómago al intestino. Un portero muy estricto.",
+                "El reflujo gástrico es cuando el ácido regresa. No es un buen 'reencuentro'.",
+                "Las heces son 75% agua y el resto bacterias muertas. Un dato que no querías saber.",
+                "El intestino produce serotonina, la hormona de la felicidad. Tu 'tripa' también te hace feliz.",
+                "El ácido estomacal es pH 1.5 a 3.5. Más ácido que muchos refrescos, irónicamente.",
+                "El intestino se mueve como olas (peristalsis). Un surf constante para la comida.",
+                "Si comes muy rápido, tragas mucho aire (gases).",
+                "Las glándulas salivales responden al pensamiento de comida. Solo pensar en un limón...",
+                "El intestino grueso es corto pero 'gordo'. Recolecta la basura.",
+                "La vesícula biliar almacena la bilis del hígado. Un pequeño depósito de químicos verdes.",
+                "Comemos unas 30 toneladas de comida en la vida. Más que el peso de un camión.",
+                "La digestión es el proceso que convierte un bistec en energía. ¡Magia bioquímica!"
+            ],
+            higado: [
+                "Es el único órgano que puede regenerarse. Si pierdes un pedazo, simplemente vuelve a crecer. (¡No intentes esto en casa!)", 
+                "Es el 'laboratorio' o la 'planta de filtración' 24/7 del cuerpo. Siempre está trabajando y tú no le pagas.", 
+                "Filtra 1.4 litros de sangre por minuto. Más eficiente que cualquier filtro de agua.",
+                "Es el órgano interno más pesado, alrededor de 1.5 kg. Llévalo en la maleta de mano.",
+                "Produce bilis, que ayuda a disolver la grasa. Su detergente natural.",
+                "Almacena vitaminas y glucosa. Es tu despensa de emergencia.", 
+                "Descompone toxinas como el alcohol. Tu héroe contra las malas decisiones.",
+                "El hígado ayuda a que la sangre coagule. Evita que te desangres por un corte pequeño.",
+                "Está ubicado justo debajo de las costillas, en el lado derecho. Es un vecino ruidoso del estómago.", 
+                "Si el hígado falla, todo falla. Es el engranaje principal, no es opcional.",
+                "Convierte el amoníaco (tóxico) en urea (menos tóxico, para el riñón). Un reciclador profesional.",
+                "Tiene una circulación sanguínea dual (vena porta y arteria hepática). Doble suministro, doble responsabilidad.",
+                "Produce la mayoría de las proteínas en la sangre. Es la fábrica de tu plasma.",
+                "Puede seguir funcionando incluso si el 75% está dañado. Un verdadero guerrero biológico.",
+                "La ictericia es cuando la piel se pone amarilla porque el hígado no filtra bien la bilirrubina. (Se pone amarillo de envidia).",
+                "Ayuda a regular los niveles de azúcar. Mantiene tu glucosa bajo control.",
+                "El daño por alcohol es lento y silencioso (cirrosis). No te da un aviso inmediato.",
+                "El hígado genera calor. Es un calentador corporal en funcionamiento constante.",
+                "La vesícula biliar es el 'almacén' de la bilis. No la produce, solo la guarda.",
+                "Ayuda a regular las hormonas. Participa en casi todo.",
+                "Las células hepáticas se llaman hepatocitos. Sus obreros internos.",
+                "Tiene varios lóbulos, como si fueran departamentos separados.",
+                "El hígado es clave para el metabolismo de las grasas. Sin él, engordarías sin control.",
+                "La hepatitis es una inflamación del hígado. Está 'hinchado' de trabajo.",
+                "La grasa en el hígado se llama esteatosis hepática. Es como si el laboratorio estuviera sucio.",
+                "Ayuda a la inmunidad, filtrando bacterias de la sangre del intestino. Un guardia de seguridad interno.",
+                "Es el responsable del olor a ajo en tu aliento. ¡Culpa a tu hígado, no a tu plato!",
+                "El hígado tiene que lidiar con todo lo que comes y bebes. Imagina su paciencia.",
+                "Es el órgano más grande si contamos piel y huesos, pero el más grande interno.",
+                "Puede ser trasplantado en parte. El órgano que da y recibe."
+            ],
+            rinones: [
+                "Filtran toda la sangre del cuerpo unas 60 veces al día. Tienen más trabajo que un camarero en hora pico.", 
+                "Están detrás de tus costillas inferiores. Se esconden porque son muy importantes.", 
+                "Tienes alrededor de un millón de 'filtros' diminutos llamados nefronas en cada uno. ¡Mini-purificadores!",
+                "La orina es el desecho líquido que producen. Tu forma de 'tirar la basura'.",
+                "Puedes vivir perfectamente con uno solo. Son como un par de repuesto.", 
+                "Regulan la presión arterial. Si algo les molesta, te suben la presión para quejarse.",
+                "Se pueden formar 'piedras' muy dolorosas si no bebes suficiente agua. (Son rocas internas, ¡ay!).",
+                "Ayudan a activar la Vitamina D para tener huesos fuertes. Un poco de todo.",
+                "Su forma es de frijol. La naturaleza tiene un sentido del humor culinario.", 
+                "El 99% del líquido que filtran vuelve a la sangre. Solo botan lo que no sirve. Son muy ahorradores.",
+                "Necesitan muchísima energía para funcionar. Unas baterías gigantes.",
+                "El color de la orina te dice si tomas suficiente agua. Si es amarillo oscuro, ¡bebe más!",
+                "Controlan el equilibrio de sales y minerales. Un químico corporal muy preciso.",
+                "Si fallan, la diálisis es la 'máquina de riñón' externa. Un trabajo temporal.",
+                "La vejiga guarda la orina. Un globo muscular que se estira (y te avisa cuando está lleno).",
+                "Los riñones están un poco más altos que el otro. Les gusta el desorden.",
+                "Ayudan a producir glóbulos rojos. Tienen una función sanguínea extra.",
+                "La uretra es el tubo final de salida. La tubería de escape.",
+                "La parte interna es la médula, y la externa la corteza. Capas de filtrado.",
+                "Regulan el pH de la sangre. Mantienen la acidez en el punto correcto.",
+                "El exceso de sal hace que retengan agua. Se ponen tercos con el sodio.",
+                "El dolor de riñones se siente en la espalda baja, no en el vientre. Es un dolor engañoso.",
+                "Las nefronas filtran por un proceso de presión. Es como hacer café expreso con la sangre.",
+                "Producen una hormona llamada renina. Clave para la presión.",
+                "El cuerpo es 60% agua, y los riñones controlan esa cantidad. Tu control de inundaciones.",
+                "La orina es estéril (sin gérmenes) al salir del riñón. Luego en el exterior...",
+                "El alcohol deshidrata, lo que les da más trabajo. Menos alcohol, menos quejas de los riñones.",
+                "El 'glomérulo' es el filtro inicial. Un colador muy fino.",
+                "Se pueden dañar por la diabetes y la presión alta. Cuídate para cuidarlos.",
+                "Son esenciales para la vida. No los ignores, son tu equipo de soporte vital."
+            ],
+            esqueleto: [
+                "Los bebés tienen 300 huesos, pero los adultos solo 206. ¡Se 'fusionan' al crecer!", 
+                "El fémur (hueso del muslo) es el hueso más largo y fuerte. Soporta tu peso, tu drama y tus saltos.", 
+                "El hueso más pequeño es el estribo en el oído. Taaan pequeño que tienes que ponerle zoom.",
+                "El cráneo protege tu cerebro. Tu casco natural y permanente.", 
+                "El hueso se renueva constantemente. Cada 10 años tienes un esqueleto completamente nuevo, ¡gratis!",
+                "El hueso hioides en el cuello es el único que no está unido a otro. Es el 'solitario' del esqueleto.", 
+                "El tuétano (médula ósea) dentro de los huesos fabrica sangre. Tu centro de producción sanguínea.",
+                "Somos más altos por la mañana. La gravedad aplasta los cartílagos durante el día.",
+                "Los dientes no se cuentan como huesos, son más duros. La única parte más dura que un hueso.",
+                "La rótula de los bebés es blanda (cartílago). Por eso ruedan tan bien.",
+                "El cartílago es el colchón de las articulaciones. Evita que los huesos 'choquen'.",
+                "La columna vertebral tiene 33 huesos. La torre de control de tu cuerpo.",
+                "El esqueleto es un almacén de calcio. Tu cuenta bancaria de minerales.",
+                "Las costillas protegen los pulmones y el corazón. Tu armadura de vida.",
+                "La osteoporosis es cuando los huesos se vuelven porosos. Como un queso suizo viejo.",
+                "Los ligamentos conectan hueso con hueso. Unas cuerdas muy fuertes.",
+                "Los tendones conectan músculo con hueso. La palanca que te hace mover.",
+                "La pelvis es el 'plato' que soporta el torso. Fundamental para sentarse.",
+                "Una fractura es un hueso roto. ¡Silencio, se está reparando!",
+                "La mandíbula es el hueso facial más fuerte. Clave para masticar y hablar mucho.",
+                "Las manos y los pies tienen más de la mitad de todos los huesos del cuerpo. ¡Demasiados pequeños huesos!",
+                "El hueso por dentro es como una esponja, no sólido. Necesita ser ligero.",
+                "Las articulaciones son donde los huesos se unen. El punto clave para el baile.",
+                "El coxis es el remanente de una cola. La evolución es divertida.",
+                "El esternón es el hueso del centro del pecho. El escudo central.",
+                "La muñeca tiene 8 huesos pequeños. Un complejo mecanismo de bisagra.",
+                "El periostio es la capa que cubre el hueso. Su 'piel' protectora.",
+                "La sangre roja y blanca se produce en la médula ósea. Tu fábrica sanguínea.",
+                "La columna tiene curvas naturales. No es una línea recta, es una S.",
+                "El hueso es tejido vivo, no un trozo de roca. Crece, se cura y duele."
+            ],
+            ojos: [
+                "El músculo del ojo es el más rápido y ágil. Parpadea más rápido de lo que te da tiempo a pensar.", 
+                "La córnea es la única parte del cuerpo que no tiene vasos sanguíneos. Se alimenta de lágrimas.", 
+                "El ojo ve todo al revés, y tu cerebro lo voltea. Es un corrector de imágenes automático.",
+                "Parpadeamos unas 15-20 veces por minuto, como un obturador de cámara constante.", 
+                "El iris es el músculo que le da color al ojo. El diseño natural de tus ojos.",
+                "La pupila cambia con la emoción, no solo con la luz. Se dilata con el miedo o la emoción.",
+                "Un recién nacido no puede llorar con lágrimas. Los conductos aún no están listos. (¡Lloran sin humedad!).", 
+                "El ojo solo puede ver tres colores: rojo, azul y verde. Todo lo demás es una mezcla.",
+                "El 'punto ciego' es real, es donde el nervio óptico sale del ojo. Tu cerebro lo rellena.", 
+                "Los ojos tienen 7 millones de conos (para el color) y 100 millones de bastones (para la noche).",
+                "La miopía es cuando el ojo es demasiado largo. Ves mal de lejos.",
+                "La hipermetropía es cuando el ojo es demasiado corto. Ves mal de cerca.",
+                "El cristalino es el lente interno que enfoca la luz. Un zoom integrado.",
+                "La retina es como la pantalla de cine. Las imágenes se proyectan ahí.",
+                "La 'conjuntivitis' es una inflamación de la capa protectora. Ojo rojo y molesto.",
+                "El glaucoma es la presión alta en el ojo. Lo daña lentamente.",
+                "La gente con heterocromía tiene un ojo de cada color. Un look único.",
+                "El ojo tiene más de 2 millones de partes funcionales. Una maravilla de la ingeniería.",
+                "La visión 20/20 significa que ves a 20 pies lo que deberías ver a 20 pies. Una medida de agudeza.",
+                "El ojo humano puede distinguir unos 10 millones de colores. Suficiente para la vida.",
+                "Las lágrimas tienen propiedades antibacterianas. Limpieza natural.",
+                "La córnea se repara muy rápido. Una herida en el ojo sana en días.",
+                "Los ojos están lubricados con tres tipos de líquidos: agua, aceite y moco.",
+                "El 'tercer párpado' (pliegue semilunar) es un remanente de la evolución.",
+                "La luz viaja a la velocidad de la luz, pero tu cerebro la procesa con un ligero retraso.",
+                "La pupila negra es un agujero, no una parte. Es la ausencia de color.",
+                "Los ojos pesan unos 8 gramos. Pequeños y poderosos.",
+                "La edad hace que el cristalino se endurezca (presbicia). Necesitas gafas para leer.",
+                "La visión estereoscópica (dos ojos) nos da la profundidad. Clave para no chocar.",
+                "El nervio óptico lleva la información al cerebro. El cable de datos."
+            ],
+            piel: [
+                "Es el órgano más grande de todos. ¡Te cubre de pies a cabeza! (Un traje de cuerpo completo).", 
+                "Pesa unos 4 a 5 kg. No es solo un envoltorio, es un peso pesado.", 
+                "Te deshaces de 30,000 a 40,000 células de piel muerta cada hora. ¡Estás dejando un rastro por donde vas!",
+                "La epidermis se renueva cada 28 días. Siempre tienes una piel 'nueva'.", 
+                "La melanina es el pigmento que te da color. Es tu protector solar natural.",
+                "Tu piel tiene tres capas: epidermis, dermis e hipodermis. Un sistema de triple protección.", 
+                "El olor corporal viene de las bacterias comiendo tu sudor. Es una 'cena' bacterial.",
+                "Las huellas dactilares son únicas. No hay dos iguales. Tu sello personal.", 
+                "Controla la temperatura corporal. Sudar te enfría, la piel de gallina te calienta.",
+                "Puede absorber vitamina D del sol. La única parte de ti que hace fotosíntesis.", 
+                "Una cicatriz es una piel 'reparada' que no es igual a la original. Una marca de batalla.",
+                "Tienes kilómetros de vasos sanguíneos debajo de la piel. Un mapa gigante.",
+                "El acné es la obstrucción de los poros. La adolescencia es dura con los poros.",
+                "Sentimos dolor, tacto, temperatura y presión. Es tu interfaz con el mundo.",
+                "Los pelos de la piel son vestigios de un pasado peludo. Ya no sirven de mucho.",
+                "La piel del párpado es la más fina. No tiene mucha defensa ahí.",
+                "La piel de los pies es la más gruesa. Por si caminas descalzo sobre el cemento.",
+                "Las arrugas son causadas por la pérdida de colágeno y elastina. La piel se 'desinfla'.",
+                "El tatuaje es tinta inyectada en la dermis, la capa interna. La epidermis lo renovaría.",
+                "La piel de gallina es un reflejo que levanta el pelo. En el pasado, nos hacía parecer más grandes.",
+                "Las uñas y el pelo están hechos de queratina. El mismo material duro.",
+                "La dermis tiene nervios y glándulas. La zona de acción y sensación.",
+                "El pH de la piel es ácido (pH 5.5). Ayuda a matar bacterias.",
+                "Las glándulas sebáceas producen aceite (sebo). El lubricante natural de tu piel.",
+                "Los poros son los pequeños agujeros por donde sale el sudor. Micro-túneles.",
+                "Las estrías son piel que se estiró demasiado rápido. Ruptura de fibras.",
+                "La piel refleja tu salud. Si estás enfermo, se nota en el color.",
+                "El tacto es el primer sentido que desarrollamos. La forma más básica de comunicarte.",
+                "Protege contra el agua (es impermeable). No te deshaces en la ducha.",
+                "La piel actúa como una barrera inmunológica. Un escudo contra los gérmenes."
+            ],
+            reproductor: [
+                "El óvulo es la célula más grande del cuerpo, visible a simple vista. ¡La más diva de todas!", 
+                "El espermatozoide es una de las más pequeñas, con una cola para nadar. Un nadador diminuto y rápido.", 
+                "Las mujeres nacen con todos los óvulos que usarán. Es una cuenta bancaria de células limitada.",
+                "Los hombres producen millones de espermatozoides por día. Una fábrica de producción constante.",
+                "El ADN (código genético) es lo que te hace único. ¡Eres una fórmula exclusiva!", 
+                "El cromosoma 'Y' define si serás hombre. Si el esperma trae la 'Y', es niño.",
+                "El embarazo dura 9 meses. Un proyecto a largo plazo.",
+                "El útero es un músculo que se expande. Es el 'apartamento' de un bebé por 9 meses.", 
+                "El óvulo vive solo unas 12-24 horas. ¡Es una carrera contra el tiempo!",
+                "El espermatozoide puede vivir varios días dentro del cuerpo femenino. Es más resistente.",
+                "La pubertad son las hormonas que te dicen 'es hora de crecer'. Un cambio de sistema obligatorio.", 
+                "El ADN, si se desenrollara, se estiraría de la Tierra a Plutón. ¡Un cable de datos espacial!",
+                "Los gemelos idénticos tienen el mismo ADN, pero diferentes huellas dactilares. No son tan idénticos.",
+                "El sexo biológico se determina en la concepción. El primer 'sorteo' de la vida.",
+                "Los ovarios liberan un óvulo al mes. Es un proceso cíclico.",
+                "La placenta conecta a la madre y el bebé. El soporte vital temporal.",
+                "Los testículos están fuera para estar más frescos. Necesitan una temperatura más baja.",
+                "Las hormonas controlan los cambios de humor y el crecimiento. El caos de la adolescencia.",
+                "El ciclo menstrual es complejo. Un proceso de renovación constante.",
+                "La fecundación ocurre en las trompas de Falopio. No en el útero, es un viaje.",
+                "El embrión se implanta en el útero. El inicio de la vivienda.",
+                "El cordón umbilical es la línea de suministro y desecho. La conexión vital.",
+                "Los gametos son las células sexuales. Los actores principales de la reproducción.",
+                "El semen es más que esperma. Tiene nutrientes y fluidos protectores.",
+                "La herencia genética es la mezcla de rasgos de ambos padres. ¡Eres un cóctel genético!",
+                "El esperma tiene que nadar una distancia que, para un humano, sería de 6,000 km.",
+                "Las células sexuales son haploides (media copia de ADN). Se unen para formar un diploide (completo).",
+                "El útero tiene tres capas. Un fuerte sistema de paredes.",
+                "La menopausia es el fin de la etapa reproductiva femenina. Se cierra el ciclo.",
+                "La fertilidad es mayor en la juventud. Declina con el tiempo."
+            ]
+        };
+
+        // --- ESTADO Y VARIABLES GLOBALES ---
+        const organs = Object.keys(factsDB);
+        const state = {
+            intervals: {}, // Almacena un ID de intervalo por cada órgano
+            indices: {}
+        };
+        const FACT_DURATION = 15000; // 15 Segundos
+
+        // Inicializar índices
+        organs.forEach(org => state.indices[org] = 0);
+
+        // --- LÓGICA DE DATOS CURIOSOS ---
+        function updateFactDisplay(organ) {
+            const index = state.indices[organ];
+            const fact = factsDB[organ][index];
+            const pElement = document.getElementById(`fact-${organ}`);
+            const barElement = document.getElementById(`prog-${organ}`);
+
+            if(!pElement || !barElement) return;
+
+            // Animación de texto
+            pElement.style.opacity = 0;
+            setTimeout(() => {
+                pElement.textContent = fact;
+                pElement.style.opacity = 1;
+            }, 300);
+
+            // Reiniciar barra de progreso
+            // Truco: forzar reflow para reiniciar la animación CSS
+            barElement.style.transition = 'none';
+            barElement.style.width = '0%';
+            
+            // Forzar reflow
+            void barElement.offsetWidth; 
+
+            // Iniciar animación
+            barElement.style.transition = `width ${FACT_DURATION}ms linear`;
+            barElement.style.width = '100%';
+        }
+
+        // Función para cambiar dato manualmente
+        function changeFact(organ, direction) {
+            const current = state.indices[organ];
+            const total = factsDB[organ].length;
+            let next = current + direction;
+            
+            if (next >= total) next = 0;
+            if (next < 0) next = total - 1;
+            
+            state.indices[organ] = next;
+            updateFactDisplay(organ);
+
+            // REINICIAR SOLO EL TEMPORIZADOR DE ESTE ÓRGANO
+            startOrganTimer(organ); 
+        }
+
+        // Inicia (o reinicia) el timer para un órgano específico
+        function startOrganTimer(organ) {
+            // Limpiar intervalo existente si hay uno
+            if (state.intervals[organ]) {
+                clearInterval(state.intervals[organ]);
+            }
+
+            // Crear nuevo intervalo independiente
+            state.intervals[organ] = setInterval(() => {
+                state.indices[organ] = (state.indices[organ] + 1) % factsDB[organ].length;
+                updateFactDisplay(organ);
+            }, FACT_DURATION);
+            
+            // Asegurarse de que la barra se resetee visualmente al iniciar el timer
+            const barElement = document.getElementById(`prog-${organ}`);
+            if(barElement) {
+                barElement.style.transition = 'none';
+                barElement.style.width = '0%';
+                void barElement.offsetWidth;
+                barElement.style.transition = `width ${FACT_DURATION}ms linear`;
+                barElement.style.width = '100%';
+            }
+        }
+
+        // Inicio
+        document.addEventListener('DOMContentLoaded', () => {
+            organs.forEach(organ => {
+                updateFactDisplay(organ); // Mostrar primer dato
+                startOrganTimer(organ);   // Iniciar su reloj independiente
+            });
+        });
+
+        // --- LÓGICA DEL QUIZ (Preguntas Nivel Secundaria) ---
+        const questionsDB = [
+            // Corazón
+            { q: "¿Cuál es la función principal del corazón?", a: "Bombear sangre", opts: ["Filtrar aire", "Bombear sangre", "Digestion", "Pensar"] },
+            { q: "¿Qué vaso sanguíneo saca sangre del corazón al cuerpo?", a: "Aorta", opts: ["Vena Cava", "Aorta", "Pulmonar", "Capilar"] },
+            { q: "¿Cuántas cámaras tiene el corazón humano?", a: "4", opts: ["2", "3", "4", "6"] },
+            { q: "¿Qué lado del corazón bombea sangre a los pulmones?", a: "Derecho", opts: ["Izquierdo", "Derecho", "Ambos", "Ninguno"] },
+            { q: "¿Qué hace que la sangre sea roja?", a: "Hierro/Hemoglobina", opts: ["Azúcar", "Agua", "Hierro/Hemoglobina", "Oxígeno solo"] },
+            
+            // Cerebro
+            { q: "¿Qué órgano controla tus pensamientos?", a: "Cerebro", opts: ["Corazón", "Cerebro", "Estómago", "Hígado"] },
+            { q: "¿Cuál es la célula principal del cerebro?", a: "Neurona", opts: ["Glóbulo rojo", "Neurona", "Célula ósea", "Bacteria"] },
+            { q: "¿Qué parte del cerebro ayuda al equilibrio?", a: "Cerebelo", opts: ["Corteza", "Cerebelo", "Tronco", "Frente"] },
+            { q: "¿El cerebro siente dolor si lo tocas?", a: "No", opts: ["Sí", "Mucho", "No", "A veces"] },
+            { q: "¿Qué protege al cerebro?", a: "Cráneo", opts: ["Costillas", "Piel sola", "Cráneo", "Músculo"] },
+            
+            // Digestivo
+            { q: "¿Dónde comienza la digestión?", a: "Boca", opts: ["Estómago", "Boca", "Esófago", "Intestino"] },
+            { q: "¿Qué tubo lleva la comida al estómago?", a: "Esófago", opts: ["Tráquea", "Aorta", "Esófago", "Uréter"] },
+            { q: "¿Dónde se absorben los nutrientes?", a: "Intestino Delgado", opts: ["Estómago", "Intestino Delgado", "Colon", "Hígado"] },
+            { q: "¿Qué órgano produce bilis?", a: "Hígado", opts: ["Páncreas", "Estómago", "Hígado", "Riñón"] },
+            { q: "¿Para qué sirven los dientes?", a: "Triturar comida", opts: ["Saborear", "Triturar comida", "Absorber", "Filtrar"] },
+            
+            // Hígado
+            { q: "¿Cuál es el órgano interno más grande?", a: "Hígado", opts: ["Estómago", "Pulmón", "Hígado", "Corazón"] },
+            { q: "¿Qué filtra el hígado?", a: "Toxinas de la sangre", opts: ["Aire", "Orina", "Toxinas de la sangre", "Luz"] },
+            { q: "¿Qué pasa si bebes mucho alcohol?", a: "Dañas el hígado", opts: ["Mejoras la vista", "Dañas el hígado", "Fortaleces huesos", "Nada"] },
+            { q: "¿El hígado puede volver a crecer?", a: "Sí, se regenera", opts: ["No, nunca", "Sí, se regenera", "Solo en niños", "A veces"] },
+            { q: "¿Dónde está el hígado?", a: "Lado derecho abdomen", opts: ["Cabeza", "Pecho", "Lado derecho abdomen", "Pierna"] },
+            
+            // Riñones
+            { q: "¿Qué líquido producen los riñones?", a: "Orina", opts: ["Sudor", "Sangre", "Orina", "Saliva"] },
+            { q: "¿Cuántos riñones tenemos normalmente?", a: "2", opts: ["1", "2", "3", "4"] },
+            { q: "¿Dónde se guarda la orina antes de salir?", a: "Vejiga", opts: ["Riñón", "Estómago", "Vejiga", "Hígado"] },
+            { q: "¿Qué forma tienen los riñones?", a: "De frijol", opts: ["Redonda", "De frijol", "Cuadrada", "Triangular"] },
+            { q: "¿Qué limpian los riñones?", a: "La sangre", opts: ["El aire", "La comida", "La sangre", "Los huesos"] },
+            
+            // Esqueleto
+            { q: "¿Cuál es el hueso más largo del cuerpo?", a: "Fémur", opts: ["Tibia", "Húmero", "Fémur", "Radio"] },
+            { q: "¿Cuántos huesos tiene un adulto aprox?", a: "206", opts: ["100", "206", "300", "500"] },
+            { q: "¿Qué protegen las costillas?", a: "Corazón y Pulmones", opts: ["Cerebro", "Piernas", "Corazón y Pulmones", "Brazos"] },
+            { q: "¿Qué mineral fortalece los huesos?", a: "Calcio", opts: ["Hierro", "Calcio", "Sodio", "Potasio"] },
+            { q: "¿Qué une un hueso con otro?", a: "Articulación", opts: ["Músculo", "Piel", "Articulación", "Nervio"] },
+            
+            // Ojos
+            { q: "¿Qué parte del ojo tiene color?", a: "Iris", opts: ["Pupila", "Córnea", "Iris", "Retina"] },
+            { q: "¿Qué agujero deja entrar la luz?", a: "Pupila", opts: ["Iris", "Pupila", "Párpado", "Lente"] },
+            { q: "¿Cuántos ojos tenemos?", a: "2", opts: ["1", "2", "3", "4"] },
+            { q: "¿Qué usamos para ver?", a: "Ojos y Cerebro", opts: ["Solo ojos", "Ojos y Cerebro", "Nariz", "Oídos"] },
+            { q: "¿Qué protege el ojo del polvo?", a: "Pestañas y Párpados", opts: ["Cejas", "Pestañas y Párpados", "Gafas", "Iris"] },
+            
+            // Piel
+            { q: "¿Cuál es el órgano más grande del cuerpo?", a: "Piel", opts: ["Hígado", "Intestino", "Piel", "Pulmón"] },
+            { q: "¿Qué nos protege del sol en la piel?", a: "Melanina (bronceado)", opts: ["Sudor", "Pelo", "Melanina (bronceado)", "Grasa"] },
+            { q: "¿Por qué sudamos?", a: "Para enfriar el cuerpo", opts: ["Para oler mal", "Para enfriar el cuerpo", "Por gusto", "Para dormir"] },
+            { q: "¿Qué sentido está en la piel?", a: "Tacto", opts: ["Vista", "Oído", "Tacto", "Gusto"] },
+            { q: "¿Las uñas son parte de...?", a: "La piel (sistema tegumentario)", opts: ["Los huesos", "La piel (sistema tegumentario)", "Los músculos", "Los nervios"] },
+            
+            // Pulmones
+            { q: "¿Qué gas necesitamos del aire?", a: "Oxígeno", opts: ["Nitrógeno", "Oxígeno", "Helio", "Carbono"] },
+            { q: "¿Qué gas expulsamos al respirar?", a: "Dióxido de Carbono", opts: ["Oxígeno", "Dióxido de Carbono", "Oro", "Hidrógeno"] },
+            { q: "¿Cuántos pulmones tenemos?", a: "2", opts: ["1", "2", "3", "Ninguno"] },
+            { q: "¿Qué músculo ayuda a respirar?", a: "Diafragma", opts: ["Corazón", "Bíceps", "Diafragma", "Lengua"] },
+            { q: "¿Qué hábito daña mucho los pulmones?", a: "Fumar", opts: ["Correr", "Comer", "Fumar", "Dormir"] },
+            
+            // Reproductor
+            { q: "¿Qué célula pone la madre?", a: "Óvulo", opts: ["Espermatozoide", "Óvulo", "Neurona", "Piel"] },
+            { q: "¿Qué célula pone el padre?", a: "Espermatozoide", opts: ["Óvulo", "Espermatozoide", "Hueso", "Sangre"] },
+            { q: "¿Cuánto dura un embarazo humano normal?", a: "9 meses", opts: ["3 meses", "6 meses", "9 meses", "12 meses"] },
+            { q: "¿Dónde crece el bebé antes de nacer?", a: "Útero", opts: ["Estómago", "Útero", "Hígado", "Pulmón"] },
+            { q: "¿Qué conecta al bebé con la madre?", a: "Cordón umbilical", opts: ["Intestino", "Cordón umbilical", "Columna", "Nervio"] }
+        ];
+
+        let quizState = {
+            activeQuestions: [],
+            currentIndex: 0,
+            score: 0,
+            mistakes: []
+        };
+
+        function startQuiz() {
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('quiz-results').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'block';
+
+            const shuffled = [...questionsDB].sort(() => 0.5 - Math.random());
+            quizState.activeQuestions = shuffled.slice(0, 10);
+            quizState.currentIndex = 0;
+            quizState.score = 0;
+            quizState.mistakes = [];
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = quizState.activeQuestions[quizState.currentIndex];
+            
+            document.getElementById('question-text').textContent = `${quizState.currentIndex + 1}. ${q.q}`;
+            document.getElementById('progress-text').textContent = `Pregunta ${quizState.currentIndex + 1} de 10`;
+
+            const optsContainer = document.getElementById('options-grid');
+            optsContainer.innerHTML = '';
+            
+            const mixedOpts = [...q.opts].sort(() => 0.5 - Math.random());
+
+            mixedOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(opt, q, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, questionObj, btnElement) {
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            const isCorrect = selected === questionObj.a;
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                quizState.score++;
+            } else {
+                btnElement.classList.add('incorrect');
+                allBtns.forEach(b => {
+                    if (b.textContent === questionObj.a) b.classList.add('correct');
+                });
+                quizState.mistakes.push({ q: questionObj.q, your: selected, right: questionObj.a });
+            }
+
+            setTimeout(() => {
+                quizState.currentIndex++;
+                if (quizState.currentIndex < 10) {
+                    renderQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function showResults() {
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('quiz-results').style.display = 'block';
+            
+            const score = quizState.score;
+            document.getElementById('final-score').textContent = score;
+
+            let msg = "";
+            if (score === 10) msg = "¡Excelente! ¡Sacaste un 10 perfecto! 🌟";
+            else if (score >= 7) msg = "¡Muy bien! Sabes mucho sobre el cuerpo. 👍";
+            else if (score >= 4) msg = "Bien, pero puedes repasar un poco más. 📖";
+            else msg = "Sigue aprendiendo y vuelve a intentar. 💪";
+            
+            document.getElementById('score-msg').textContent = msg;
+
+            const errorDiv = document.getElementById('error-review');
+            const errorList = document.getElementById('error-list');
+            errorList.innerHTML = '';
+
+            if (quizState.mistakes.length > 0) {
+                errorDiv.style.display = 'block';
+                quizState.mistakes.forEach(err => {
+                    const item = document.createElement('div');
+                    item.className = 'error-item';
+                    item.innerHTML = `
+                        <strong>P: ${err.q}</strong><br>
+                        <span style="color:red">Tu respuesta: ${err.your}</span><br>
+                        <span style="color:green">Correcta: ${err.right}</span>
+                    `;
+                    errorList.appendChild(item);
+                });
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
